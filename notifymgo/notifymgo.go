@@ -7,6 +7,28 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+//Indexes is the mongo findex field
+var Indexes = map[string]mgo.Index{
+	"message_oid": mgo.Index{
+		Key: []string{"oid"},
+	},
+	"message_owner": mgo.Index{
+		Key: []string{"owner"},
+	},
+	"message_type": mgo.Index{
+		Key: []string{"type"},
+	},
+	"message_marked": mgo.Index{
+		Key: []string{"marked"},
+	},
+	"message_count": mgo.Index{
+		Key: []string{"count"},
+	},
+	"message_time": mgo.Index{
+		Key: []string{"time"},
+	},
+}
+
 //NotifyMgo is impl to NotifyDb by mongo
 type NotifyMgo struct {
 	Name  string
