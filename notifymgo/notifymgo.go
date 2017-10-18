@@ -8,23 +8,23 @@ import (
 )
 
 //Indexes is the mongo findex field
-var Indexes = map[string]mongoc.Index{
-	"message_oid": mongoc.Index{
+var Indexes = map[string]*mongoc.Index{
+	"message_oid": &mongoc.Index{
 		Key: []string{"oid"},
 	},
-	"message_owner": mongoc.Index{
+	"message_owner": &mongoc.Index{
 		Key: []string{"owner"},
 	},
-	"message_type": mongoc.Index{
+	"message_type": &mongoc.Index{
 		Key: []string{"type"},
 	},
-	"message_marked": mongoc.Index{
+	"message_marked": &mongoc.Index{
 		Key: []string{"marked"},
 	},
-	"message_count": mongoc.Index{
+	"message_count": &mongoc.Index{
 		Key: []string{"count"},
 	},
-	"message_time": mongoc.Index{
+	"message_time": &mongoc.Index{
 		Key: []string{"time"},
 	},
 }
