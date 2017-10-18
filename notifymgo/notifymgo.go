@@ -8,25 +8,13 @@ import (
 )
 
 //Indexes is the mongo findex field
-var Indexes = map[string]*mongoc.Index{
-	"message_oid": &mongoc.Index{
-		Key: []string{"oid"},
-	},
-	"message_owner": &mongoc.Index{
-		Key: []string{"owner"},
-	},
-	"message_type": &mongoc.Index{
-		Key: []string{"type"},
-	},
-	"message_marked": &mongoc.Index{
-		Key: []string{"marked"},
-	},
-	"message_count": &mongoc.Index{
-		Key: []string{"count"},
-	},
-	"message_time": &mongoc.Index{
-		Key: []string{"time"},
-	},
+var Indexes = []*mongoc.Index{
+	{Name: "message_oid", Key: []string{"oid"}},
+	{Name: "message_owner", Key: []string{"owner"}},
+	{Name: "message_type", Key: []string{"type"}},
+	{Name: "message_marked", Key: []string{"marked"}},
+	{Name: "message_count", Key: []string{"count"}},
+	{Name: "message_time", Key: []string{"time"}},
 }
 
 //NotifyMgo is impl to NotifyDb by mongo
