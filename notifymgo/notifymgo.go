@@ -3,28 +3,28 @@ package notifymgo
 import (
 	"github.com/Centny/gwf/netw/rc/plugin"
 	"github.com/Centny/gwf/util"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/bson.v2"
+	"gopkg.in/mongoc.v1"
 )
 
 //Indexes is the mongo findex field
-var Indexes = map[string]mgo.Index{
-	"message_oid": mgo.Index{
+var Indexes = map[string]mongoc.Index{
+	"message_oid": mongoc.Index{
 		Key: []string{"oid"},
 	},
-	"message_owner": mgo.Index{
+	"message_owner": mongoc.Index{
 		Key: []string{"owner"},
 	},
-	"message_type": mgo.Index{
+	"message_type": mongoc.Index{
 		Key: []string{"type"},
 	},
-	"message_marked": mgo.Index{
+	"message_marked": mongoc.Index{
 		Key: []string{"marked"},
 	},
-	"message_count": mgo.Index{
+	"message_count": mongoc.Index{
 		Key: []string{"count"},
 	},
-	"message_time": mgo.Index{
+	"message_time": mongoc.Index{
 		Key: []string{"time"},
 	},
 }
@@ -32,12 +32,12 @@ var Indexes = map[string]mgo.Index{
 //NotifyMgo is impl to NotifyDb by mongo
 type NotifyMgo struct {
 	Name  string
-	C     func(name string) *mgo.Collection
+	C     func(name string) *mongoc.Collection
 	Count map[string]int
 }
 
 //NewNotifyMgo is NotifyMgo creator
-func NewNotifyMgo(c func(name string) *mgo.Collection) *NotifyMgo {
+func NewNotifyMgo(c func(name string) *mongoc.Collection) *NotifyMgo {
 	return &NotifyMgo{
 		Name:  "rc_notify",
 		C:     c,
@@ -54,29 +54,27 @@ func (n *NotifyMgo) AddMessage(m *plugin.Message) error {
 
 //RemoveMessage @see NotifyDb
 func (n *NotifyMgo) RemoveMessage(id string) error {
-	return n.C(n.Name).RemoveId(id)
+	_, err := n.C(n.Name).Remove(bson.M{"_id": id}, true)
+	return err
 }
 
 //DoneMessage @see NotifyDb
 func (n *NotifyMgo) DoneMessage(mid, key string) (msg *plugin.Message, err error) {
 	msg = &plugin.Message{}
-	_, err = n.C(n.Name).Find(bson.M{
-		"_id": mid,
-		"marked": bson.M{
-			"$ne": key,
-		},
-	}).Apply(mgo.Change{
-		Upsert:    false,
-		ReturnNew: true,
-		Update: bson.M{
+	_, err = n.C(n.Name).FindAndModify(
+		bson.M{
+			"_id": mid,
+			"marked": bson.M{
+				"$ne": key,
+			},
+		}, bson.M{
 			"$addToSet": bson.M{
 				"marked": key,
 			},
 			"$inc": bson.M{
 				"count": 1,
 			},
-		},
-	}, msg)
+		}, nil, false, true, msg)
 	return
 }
 
@@ -90,6 +88,6 @@ func (n *NotifyMgo) RemoveCount(mtype string) (count int, err error) {
 
 //ListMessage @see NotifyDb
 func (n *NotifyMgo) ListMessage(m *plugin.Message) (ms []*plugin.Message, err error) {
-	err = n.C(n.Name).Find(bson.M{"type": m.Type}).All(&ms)
+	err = n.C(n.Name).Find(bson.M{"type": m.Type}, nil, 0, 0, &ms)
 	return
 }

@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Centny/dbm/mgo"
 	"github.com/Centny/gwf/netw/rc/plugin"
 	"github.com/Centny/gwf/netw/rc/rctest"
+	mongoc "gopkg.in/mongoc.v1"
 )
 
 func TestNotifyMgo(t *testing.T) {
-	mgo.AddDefault2("cny:123@loc.w:27017/cny")
-	mgo.C("rc_notify").RemoveAll(nil)
+	mongoc.InitShared("cny:123@loc.w:27017/test", "test")
+	mongoc.SharedC("rc_notify").RemoveAll(nil)
 	plugin.ShowLog = 1
 	var err error
 	var rct *rctest.RCTest
@@ -26,7 +26,7 @@ func TestNotifyMgo(t *testing.T) {
 	{
 		received = 0
 		rct = rctest.NewRCTest_j2(":9332")
-		mdb = NewNotifyMgo(mgo.C)
+		mdb = NewNotifyMgo(mongoc.SharedC)
 		srv = plugin.NewNotifySrv(mdb)
 		srv.Hand(rct.L)
 		srv.Start()
@@ -76,7 +76,7 @@ func TestNotifyMgo(t *testing.T) {
 			t.Error("not received")
 			return
 		}
-		if cc, _ := mgo.C(mdb.Name).Count(); cc > 0 {
+		if cc, _ := mongoc.SharedC(mdb.Name).Count(nil, 0, 0); cc > 0 {
 			t.Error("error")
 			return
 		}
